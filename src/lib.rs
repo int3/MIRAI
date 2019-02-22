@@ -30,7 +30,7 @@ extern crate syntax_pos;
 extern crate bincode;
 #[macro_use]
 extern crate log;
-extern crate rocksdb;
+// extern crate rocksdb;
 //#[macro_use]
 extern crate rpds;
 #[macro_use]

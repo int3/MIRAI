@@ -8,7 +8,7 @@ use environment::Environment;
 use rustc::hir::def_id::DefId;
 use rustc::ty::TyCtxt;
 use std::collections::HashMap;
-use std::ops::Deref;
+// use std::ops::Deref;
 
 /// A summary is a declarative abstract specification of what a function does.
 /// This is calculated once per function and is used by callers of the function.
@@ -166,7 +166,7 @@ pub fn summary_key_str(tcx: &TyCtxt, def_id: DefId) -> String {
 /// A persistent map from DefId to Summary.
 /// Also tracks which definitions depend on (use) any particular Summary.
 pub struct PersistentSummaryCache<'a, 'tcx: 'a> {
-    db: rocksdb::DB,
+    //db: rocksdb::DB,
     cache: HashMap<DefId, Summary>,
     dependencies: HashMap<DefId, Vec<DefId>>,
     key_cache: HashMap<DefId, String>,
@@ -178,11 +178,11 @@ impl<'a, 'tcx: 'a> PersistentSummaryCache<'a, 'tcx> {
     /// file path.
     pub fn new(
         type_context: &'a TyCtxt<'a, 'tcx, 'tcx>,
-        summary_store_path: String,
+        _summary_store_path: String,
     ) -> PersistentSummaryCache<'a, 'tcx> {
         PersistentSummaryCache {
-            db: rocksdb::DB::open_default(summary_store_path)
-                .expect(".summary_store.rocksdb should be a database file"),
+            // db: rocksdb::DB::open_default(summary_store_path)
+            //     .expect(".summary_store.rocksdb should be a database file"),
             cache: HashMap::new(),
             key_cache: HashMap::new(),
             dependencies: HashMap::new(),
@@ -211,30 +211,32 @@ impl<'a, 'tcx: 'a> PersistentSummaryCache<'a, 'tcx> {
                 }
             }
         };
-        let tcx = self.type_context;
-        let db = &self.db;
+        // let tcx = self.type_context;
+        // let db = &self.db;
         self.cache.entry(def_id).or_insert_with(|| {
-            let persistent_key = summary_key_str(tcx, def_id);
-            Self::get_persistent_summary_for_db(db, &persistent_key)
+            Summary::default()
+            // let persistent_key = summary_key_str(tcx, def_id);
+            // Self::get_persistent_summary_for_db(db, &persistent_key)
         })
     }
 
-    /// Returns the summary corresponding to the persistent_key in the the summary database.
-    /// The caller is expected to cache this.
-    pub fn get_persistent_summary_for(&self, persistent_key: &str) -> Summary {
-        let db = &self.db;
-        Self::get_persistent_summary_for_db(db, persistent_key)
+    // /// Returns the summary corresponding to the persistent_key in the the summary database.
+    // /// The caller is expected to cache this.
+    pub fn get_persistent_summary_for(&self, _persistent_key: &str) -> Summary {
+        // let db = &self.db;
+        // Self::get_persistent_summary_for_db(db, persistent_key)
+        Summary::default()
     }
 
-    /// Helper for get_summary_for and get_persistent_summary_for.
-    fn get_persistent_summary_for_db(db: &rocksdb::DB, persistent_key: &str) -> Summary {
-        match db.get(persistent_key.as_bytes()) {
-            Ok(Some(serialized_summary)) => {
-                bincode::deserialize(serialized_summary.deref()).unwrap()
-            }
-            _ => Summary::default(), // todo: #33 look for a contract summary or construct from type
-        }
-    }
+    // /// Helper for get_summary_for and get_persistent_summary_for.
+    // fn get_persistent_summary_for_db(db: &rocksdb::DB, persistent_key: &str) -> Summary {
+    //     match db.get(persistent_key.as_bytes()) {
+    //         Ok(Some(serialized_summary)) => {
+    //             bincode::deserialize(serialized_summary.deref()).unwrap()
+    //         }
+    //         _ => Summary::default(), // todo: #33 look for a contract summary or construct from type
+    //     }
+    // }
 
     /// Sets or updates the cache so that from now on def_id maps to summary.
     /// Returns a list of DefIds that need to be re-analyzed because they used
@@ -242,11 +244,11 @@ impl<'a, 'tcx: 'a> PersistentSummaryCache<'a, 'tcx> {
     /// This operation amounts to an expensive no-op if the summary is identical to the
     /// one that is already in the cache. Avoiding this is the caller's responsibility.
     pub fn set_summary_for(&mut self, def_id: DefId, summary: Summary) -> &Vec<DefId> {
-        let persistent_key = summary_key_str(self.type_context, def_id);
-        let serialized_summary = bincode::serialize(&summary).unwrap();
-        self.db
-            .put(persistent_key.as_bytes(), &serialized_summary)
-            .unwrap();
+        // let persistent_key = summary_key_str(self.type_context, def_id);
+        // let serialized_summary = bincode::serialize(&summary).unwrap();
+        // self.db
+        //     .put(persistent_key.as_bytes(), &serialized_summary)
+        //     .unwrap();
         self.cache.insert(def_id, summary);
         self.dependencies.entry(def_id).or_insert_with(Vec::new)
     }
