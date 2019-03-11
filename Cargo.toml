@@ -9,8 +9,8 @@ readme = "README.md"
 license = "MIT"
 
 [lib]
-test = false # we have no unit tests
-doctest = false # and no doc tests
+test = true
+doctest = false # we have no doc tests
 
 [[bin]]
 name = "mirai"

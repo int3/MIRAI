@@ -48,3 +48,4 @@ pub mod k_limits;
 pub mod summaries;
 pub mod utils;
 pub mod visitors;
+pub mod weak_topological_ordering;
